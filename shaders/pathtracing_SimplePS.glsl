@@ -182,6 +182,19 @@ vec2 rayUnitSphereIntersect(vec3 r0, vec3 rd) { // TODO
    if there are no intersections (-1,-1) is returned.
 */
 vec2 rayUnitBoxIntersect(vec3 r0, vec3 rd) {   // TODO
+	vec3 X = vec3(1, 0, 0);
+	vec3 Y = vec3(0, 1, 0);
+	vec3 Z = vec3(0, 0, 1);
+	
+	// First, we're computing the intersection of the ray with each of the six face 
+	// planes of the cube, using the ray-plane algorithm provided during the lecture
+	float t_pxy = (dot(Z, vec3(0, 0, 1) - r0)) / dot(Z, rd); // positive x,y-plane
+	float t_nxy = (dot(Z, vec3(0, 0, -1) - r0)) / dot(Z, rd); // negative x,y-plane
+	float t_pxz = (dot(Y, vec3(0, 1, 0) - r0)) / dot(Y, rd); // positive x,z-plane
+	float t_nxz = (dot(Y, vec3(0, -1, 0) - r0)) / dot(Y, rd); // negative x,z-plane
+	float t_pyz = (dot(X, vec3(1, 0, 0) - r0)) / dot(X, rd); // positive y,z-plane
+	float t_nyz = (dot(X, vec3(-1, 0, 0) - r0)) / dot(X, rd); // negative y,z-plane
+	
 	return vec2(-1,-1);
 }
 
