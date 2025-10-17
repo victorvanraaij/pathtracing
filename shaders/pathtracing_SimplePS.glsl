@@ -154,7 +154,28 @@ void animateObjects(float t) {    // ToDo: add three walls ...
    if there are no intersections (-1,-1) is returned.
 */
 vec2 rayUnitSphereIntersect(vec3 r0, vec3 rd) { // TODO
-	return vec2(-1,-1);  
+	// Using the ray-sphere intersection algorithm provided during the lecture
+	
+	// The sphere has the origin as its center, so (r0 - C) = r0. Radius = 1
+	float b = dot(rd, r0);
+	float c = dot(r0, r0) - 1;
+	
+	// No intersection
+	if ((b * b - c) < 0) {
+		return vec2(-1,-1);
+	}
+	
+	// Should work for only one intersection
+	float t_plus = -b + sqrt(b * b - c);
+	float t_min = -b - sqrt(b * b - c);
+	
+	// Ensure the return vector is in the right order
+	if (t_plus < t_min) {
+		return vec2(t_plus, t_min);
+	}
+	else {
+		return vec2(t_min, t_plus);
+	}
 }
 
 /* returns signed distances (t0,t1) to the intersections of ray and cube, t0 <= t1; 
