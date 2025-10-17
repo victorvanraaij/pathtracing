@@ -85,8 +85,8 @@
 		<entry type="pinned" name="useGammaCorrection" owner="Simple" />
 		<entry type="camera" fp="false">
 			<distance>42</distance>
-			<pitch>80</pitch>
-			<yaw>286</yaw>
+			<pitch>89</pitch>
+			<yaw>67</yaw>
 			<roll>360</roll>
 		</entry>
 		<entry type="clearcolor" r="0" g="0" b="0" a="0" />

@@ -162,7 +162,7 @@ vec2 rayUnitSphereIntersect(vec3 r0, vec3 rd) { // TODO
 	
 	// No intersection
 	if ((b * b - c) < 0) {
-		return vec2(-1,-1);
+		return vec2(-1);
 	}
 	
 	// Should work for only one intersection
@@ -182,20 +182,30 @@ vec2 rayUnitSphereIntersect(vec3 r0, vec3 rd) { // TODO
    if there are no intersections (-1,-1) is returned.
 */
 vec2 rayUnitBoxIntersect(vec3 r0, vec3 rd) {   // TODO
-	vec3 X = vec3(1, 0, 0);
-	vec3 Y = vec3(0, 1, 0);
-	vec3 Z = vec3(0, 0, 1);
-	
-	// First, we're computing the intersection of the ray with each of the six face 
-	// planes of the cube, using the ray-plane algorithm provided during the lecture
-	float t_pxy = (dot(Z, vec3(0, 0, 1) - r0)) / dot(Z, rd); // positive x,y-plane
-	float t_nxy = (dot(Z, vec3(0, 0, -1) - r0)) / dot(Z, rd); // negative x,y-plane
-	float t_pxz = (dot(Y, vec3(0, 1, 0) - r0)) / dot(Y, rd); // positive x,z-plane
-	float t_nxz = (dot(Y, vec3(0, -1, 0) - r0)) / dot(Y, rd); // negative x,z-plane
-	float t_pyz = (dot(X, vec3(1, 0, 0) - r0)) / dot(X, rd); // positive y,z-plane
-	float t_nyz = (dot(X, vec3(-1, 0, 0) - r0)) / dot(X, rd); // negative y,z-plane
-	
-	return vec2(-1,-1);
+    // Compute intersection distances with the cube face planes
+    vec3 tp = (vec3(-1) - r0) / rd; // Postive faces
+    vec3 tn = (vec3(1) - r0) / rd; // Negative faces
+
+    // Ensure tmin < tmax per axis
+    // Unfortunately I don't think this works if multiple t-values are negative, i.e.
+    // the cube is not entirely in front of the camera. In that case the most negative number
+    // is chosen as tmin, instead of the least negative one, which is the one closest
+    // to the camera. It shouldn't matter as negative t-values are discarded later anyway
+    vec3 tmin = min(tp, tn);
+    vec3 tmax = max(tp, tn);
+
+    // The largest tmin is the entry point, while the smallest tmax is the exit point
+    // This once again probably doesn't work for cubes not entirely in front of the camera, but
+    // it shouldn't matter as t0 will be discarded in that case anyway
+    float t0 = max(max(tmin.x, tmin.y), tmin.z);
+    float t1  = min(min(tmax.x, tmax.y), tmax.z);
+
+    // No intersection if t0 > t1
+    if (t0 > t1)
+        return vec2(-1);
+
+    return vec2(t0, t1);
+
 }
 
 /* returns normal for unit cube surface point p */
