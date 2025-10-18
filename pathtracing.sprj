@@ -26,12 +26,12 @@
 				<variable type="int" name="frame" system="FrameIndex" />
 				<variable type="int" name="averageCount">
 					<row>
-						<value>15</value>
+						<value>25</value>
 					</row>
 				</variable>
 				<variable type="int" name="maxBounces">
 					<row>
-						<value>100</value>
+						<value>20</value>
 					</row>
 				</variable>
 				<variable type="bool" name="showSphere">
@@ -68,7 +68,24 @@
 				</variable>
 				<variable type="float" name="scattering_amplitude">
 					<row>
-						<value>0.100000001</value>
+						<value>0.200000003</value>
+					</row>
+				</variable>
+				<variable type="float" name="animationSpeed">
+					<row>
+						<value>1</value>
+					</row>
+				</variable>
+				<variable type="bool" name="showLocalLight">
+					<row>
+						<value>true</value>
+					</row>
+				</variable>
+				<variable type="float3" name="localLightColor">
+					<row>
+						<value>0.0474649891</value>
+						<value>0.768339753</value>
+						<value>0.759989798</value>
 					</row>
 				</variable>
 			</variables>
@@ -78,7 +95,7 @@
 	<objects />
 	<cameras />
 	<settings>
-		<entry type="property" name="Simple" item="pipe" />
+		<entry type="file" name="Simple" shader="vs" />
 		<entry type="file" name="Simple" shader="ps" />
 		<entry type="pinned" name="averageCount" owner="Simple" />
 		<entry type="pinned" name="maxBounces" owner="Simple" />
@@ -89,10 +106,13 @@
 		<entry type="pinned" name="colorByNormal" owner="Simple" />
 		<entry type="pinned" name="useGammaCorrection" owner="Simple" />
 		<entry type="pinned" name="scattering_amplitude" owner="Simple" />
+		<entry type="pinned" name="animationSpeed" owner="Simple" />
+		<entry type="pinned" name="showLocalLight" owner="Simple" />
+		<entry type="pinned" name="localLightColor" owner="Simple" />
 		<entry type="camera" fp="false">
-			<distance>33</distance>
+			<distance>34</distance>
 			<pitch>88</pitch>
-			<yaw>144</yaw>
+			<yaw>333</yaw>
 			<roll>360</roll>
 		</entry>
 		<entry type="clearcolor" r="0" g="0" b="0" a="0" />

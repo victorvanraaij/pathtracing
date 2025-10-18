@@ -17,18 +17,22 @@ uniform vec2 vResolution;
 uniform vec4 vViewPosition;
 
 // GUI elements   // TODO add more if needed
- uniform int averageCount;
- uniform int maxBounces;
- uniform vec3 skyLight;
- uniform bool skyLightSwitch;
- uniform bool showGround;
- uniform bool showSphere;
+uniform int averageCount;
+uniform int maxBounces;
+uniform vec3 skyLight;
+uniform bool skyLightSwitch;
+uniform bool showGround;
+uniform bool showSphere;
 
- uniform bool colorByNormal;
- uniform bool useGammaCorrection;
+uniform bool colorByNormal;
+uniform bool useGammaCorrection;
  
- // How much a certain roughness scatters light
- uniform float scattering_amplitude;
+// How much a certain roughness scatters light
+uniform float scattering_amplitude;
+ 
+uniform bool showLocalLight;
+uniform vec3 localLightColor;
+uniform float animationSpeed;
 
 // some basic transformations
 mat4 Translate(in vec3 v) {       // TODO
@@ -115,7 +119,7 @@ struct Object {
 };
 
 
-#define NO 3         // TODO: make sure to match the number of objects NO with the objects you add in animateObjects().
+#define NO 10         // TODO: make sure to match the number of objects NO with the objects you add in animateObjects().
 Object objects[NO];
 
 Object makeObject(bool enabled, int type, vec3 center, vec3 size, vec3 color, float roughness, mat4 T, mat4 R, mat4 S) {
@@ -139,7 +143,7 @@ Object makeObject(bool enabled, int type, vec3 center, vec3 size, vec3 color, fl
 
 void animateObjects(float t) {    // ToDo: add three walls ...
     float pi = 3.1415926535897932;
-
+	float animated_time = t * animationSpeed;
     
     {   // Sky
         vec3 center = vec3(0.0, 0.0, 0.0);
@@ -173,6 +177,94 @@ void animateObjects(float t) {    // ToDo: add three walls ...
         mat4 S = Scale(size);
         objects[2]=makeObject(showGround, TYPE_CUBE, center, size, color, roughness, T, R, S);
         objects[2].isFloor = true; 
+    }
+    
+    {   // Local Light 1
+        // Animate in a circle
+        float radius = 2.f;
+        vec3 center = vec3(sin(animated_time) * radius, 5.0, cos(animated_time) * radius);
+        vec3 size = vec3(0.5); // Small sphere
+        vec3 color = localLightColor;
+        float roughness = 1.0; // Doesn't matter for a light
+        mat4 T = Translate(center);
+        mat4 R = mat4(1.0);
+        mat4 S = Scale(size);
+        objects[3] = makeObject(showLocalLight, TYPE_SPHERE, center, size, color, roughness, T, R, S);
+        objects[3].isLight = true;
+    }
+    
+    {   // Local Light 2
+        // Animate in a circle
+        float radius = 2.f;
+        vec3 center = vec3(-sin(animated_time) * radius, 5.0, -cos(animated_time) * radius);
+        vec3 size = vec3(0.5); // Small sphere
+        vec3 color = localLightColor;
+        float roughness = 1.0; // Doesn't matter for a light
+        mat4 T = Translate(center);
+        mat4 R = mat4(1.0);
+        mat4 S = Scale(size);
+        objects[4] = makeObject(showLocalLight, TYPE_SPHERE, center, size, color, roughness, T, R, S);
+        objects[4].isLight = true;
+    }
+    
+    {   // Back wall
+        vec3 center = vec3(0.0, 3.0, -13.0);
+        vec3 size = vec3(7.0, 6.0, 0.4);
+        vec3 color = vec3(0.5,0.5,0.5);
+        float roughness = 1.0;
+        mat4 T = Translate(center);
+        mat4 R = mat4(1.0);
+        mat4 S = Scale(size);
+        objects[5]=makeObject(showGround, TYPE_CUBE, center, size, color, roughness, T, R, S);
+        objects[5].isFloor = false; 
+    }
+    
+    {   // Left wall
+        vec3 center = vec3(-6.0, 3.0, 0.0);
+        vec3 size = vec3(0.4, 6.0, 13.0);
+        vec3 color = vec3(0,1,0);
+        float roughness = 1.0;
+        mat4 T = Translate(center);
+        mat4 R = mat4(1.0);
+        mat4 S = Scale(size);
+        objects[6]=makeObject(showGround, TYPE_CUBE, center, size, color, roughness, T, R, S);
+        objects[6].isFloor = false; 
+    }
+    
+    {   // Right wall
+        vec3 center = vec3(6.0, 3.0, 0.0);
+        vec3 size = vec3(0.4, 6.0, 13.0);
+        vec3 color = vec3(1,0,0);
+        float roughness = 1.0;
+        mat4 T = Translate(center);
+        mat4 R = mat4(1.0);
+        mat4 S = Scale(size);
+        objects[7]=makeObject(showGround, TYPE_CUBE, center, size, color, roughness, T, R, S);
+        objects[7].isFloor = false; 
+    }
+    
+    {   // Pillar 1
+        vec3 center = vec3(-3.0, 1.0, -5.0);
+        vec3 size = vec3(1.0, 3.0, 1.0);
+        vec3 color = vec3(0.5,0.5,0.5);
+        float roughness = 0.0f;
+        mat4 T = Translate(center);
+        mat4 R = RotateY(radians(45.f));
+        mat4 S = Scale(size);
+        objects[8]=makeObject(showGround, TYPE_CUBE, center, size, color, roughness, T, R, S);
+        objects[8].isFloor = false; 
+    }
+    
+    {   // Pillar 2
+        vec3 center = vec3(3.0, 1.0, -5.0);
+        vec3 size = vec3(1.0, 3.0, 1.0);
+        vec3 color = vec3(0.5,0.5,0.5);
+        float roughness = 0.0f;
+        mat4 T = Translate(center);
+        mat4 R = RotateY(-animated_time);
+        mat4 S = Scale(size);
+        objects[9]=makeObject(showGround, TYPE_CUBE, center, size, color, roughness, T, R, S);
+        objects[9].isFloor = false; 
     }
     
     // TODO: add objects here when needed
@@ -332,6 +424,10 @@ vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex)
     vec3 absorbMul = vec3(1.0);
     vec3 rayOrigin = cameraPos;
     vec3 rayDir = cameraRayDir;
+    
+    // Use the initial ray direction, which is unique per-pixel
+    // dotting with prime numbers is a simple, effective hash
+    float ray_hash = dot(cameraRayDir, vec3(12.9898, 78.233, 151.719));
 
         
     //recursion not available in GLSL; replace by looping 
@@ -347,7 +443,6 @@ vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex)
         // The new ray origin is the point of intersection in world space
         rayOrigin = (h.obj.m2w * h.intersection).xyz;
       	                           
-        //TODO 3: update rayDir for next bounce
         vec3 normal = vec3(0,0,0);
         
         // Compute normal based on object type
@@ -364,9 +459,14 @@ vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex)
         
         // Generates random angles between between positive and negative scattering_amplitude, scaled by the objects roughness,
         // using the AAIndex as a seed
-        float random_angle_x = scattering_amplitude * h.obj.roughness * (rand01(AAIndex * 434.578) - 0.5);
-        float random_angle_y = scattering_amplitude * h.obj.roughness * (rand01(AAIndex * 734.978) - 0.5);
-        float random_angle_z = scattering_amplitude * h.obj.roughness * (rand01(AAIndex * 897.709) - 0.5);
+        // using index and unique ray_hash to seed randomness
+        float seed_x = float(i) * 123.456 + AAIndex * 434.578 + ray_hash;
+        float seed_y = float(i) * 789.123 + AAIndex * 734.978 + ray_hash;
+        float seed_z = float(i) * 456.789 + AAIndex * 897.709 + ray_hash;
+        
+       	float random_angle_x = scattering_amplitude * h.obj.roughness * (rand01(seed_x) - 0.5);
+        float random_angle_y = scattering_amplitude * h.obj.roughness * (rand01(seed_y) - 0.5);
+        float random_angle_z = scattering_amplitude * h.obj.roughness * (rand01(seed_z) - 0.5);
         
         // Rotate the normal by the random angles. This makes physical sense, as we're
         // directly simulating the non-uniformity of rough suface normals.
