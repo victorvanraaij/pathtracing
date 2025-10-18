@@ -26,7 +26,7 @@
 				<variable type="int" name="frame" system="FrameIndex" />
 				<variable type="int" name="averageCount">
 					<row>
-						<value>1</value>
+						<value>15</value>
 					</row>
 				</variable>
 				<variable type="int" name="maxBounces">
@@ -46,7 +46,7 @@
 				</variable>
 				<variable type="float3" name="skyLight">
 					<row>
-						<value>0.294623852</value>
+						<value>0.395000011</value>
 						<value>0.19670251</value>
 						<value>0.35135138</value>
 					</row>
@@ -85,9 +85,9 @@
 		<entry type="pinned" name="colorByNormal" owner="Simple" />
 		<entry type="pinned" name="useGammaCorrection" owner="Simple" />
 		<entry type="camera" fp="false">
-			<distance>41</distance>
-			<pitch>-71</pitch>
-			<yaw>192</yaw>
+			<distance>46</distance>
+			<pitch>88</pitch>
+			<yaw>127</yaw>
 			<roll>360</roll>
 		</entry>
 		<entry type="clearcolor" r="0" g="0" b="0" a="0" />

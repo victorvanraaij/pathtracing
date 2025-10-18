@@ -159,16 +159,17 @@ vec2 rayUnitSphereIntersect(vec3 r0, vec3 rd) { // TODO
 	
 	// The sphere has the origin as its center, so (r0 - C) = r0. Radius = 1
 	float b = dot(rd, r0);
-	float c = dot(r0, r0) - 1;
+	float c = dot(r0, r0) - 1.f;
+	float disc = b * b - c;
 	
 	// No intersection
-	if ((b * b - c) < 0) {
-		return vec2(-1);
+	if ((disc) < 0.f) {
+		return vec2(-1.f);
 	}
 	
 	// Should work for only one intersection
-	float t_plus = -b + sqrt(b * b - c);
-	float t_min = -b - sqrt(b * b - c);
+	float t_plus = -b + sqrt(disc);
+	float t_min = -b - sqrt(disc);
 	
 	// Since the square root will always be positive (or zero), t_min is always
 	// either smaller or equal to t_plus
@@ -241,7 +242,13 @@ HitData AllObjectsRayTest(vec3 rayPos, vec3 rayDir)
          // TODO 1: transform the ray to model space
 	    vec4 mr0 = obj.w2m * vec4(rayPos,1); 
 		vec4 mrd = obj.w2m * vec4(rayDir,0);
+			
+		// Store ray length to convert t back to world-space
+        float mrd_length = length(mrd.xyz);
         
+        // Normalise Ray Dir
+        mrd.xyz = normalize(mrd.xyz);
+
 
         // compute the ray parameters t0t1 for entry and exit in model space
         vec2 t0t1 = obj.type==TYPE_SPHERE
@@ -251,7 +258,7 @@ HitData AllObjectsRayTest(vec3 rayPos, vec3 rayDir)
         // TODO 2: determine closest positive ray parameter for an intersection
         
         // Default to no intersection
-        float t = -1;
+        float t = -1.f;
         // The intersection functions ensure t0t1.x < t0t1.y, so if t0t1.x > 0, it's the closest
         // positive ray parameter
         if (t0t1.x > 0) {
@@ -265,6 +272,12 @@ HitData AllObjectsRayTest(vec3 rayPos, vec3 rayDir)
         // At this point, both ray parameters must be negative, 
         // and therefore no intersection takes place
         
+        // Store model-space t
+        float t_model = t;
+        
+        // Convert t to world-space
+        t /= mrd_length;
+        
         // TODO If new intersection is closer, update hit information
         if( t > 0.001 && t < hitData.closest)
         {
@@ -273,7 +286,7 @@ HitData AllObjectsRayTest(vec3 rayPos, vec3 rayDir)
             // Update the object that is being hit the closest
 			hitData.obj = obj;
 			// The point in model space hit by the ray, using the vector equation of a line
-		    hitData.intersection = mr0 + mrd * t;
+		    hitData.intersection = mr0 + mrd * t_model; // note we are using model space t here
         }
     }    
     
@@ -302,17 +315,30 @@ vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex)
         //+0.0001 to prevent ray already hit @ start pos
         HitData h = AllObjectsRayTest(rayOrigin + rayDir * 0.0001, rayDir);
         
-        return h.obj.color;   // TODO 1: REMOVE THIS LINE WHEN INSTRUCTED TO IN ASSIGNMENT TEXT
         
        // rays end at light source
 	   if (h.obj.isLight) {	finalColor = h.obj.color * absorbMul;	break; }
                    
-        //TODO 2:update rayOrigin for next bounce
-        rayOrigin = rayOrigin;
+        // The new ray origin is the point of intersection in world space
+        rayOrigin = (h.obj.m2w * h.intersection).xyz;
       	                           
         //TODO 3: update rayDir for next bounce
         vec3 normal = vec3(0,0,0);
-        rayDir = rayDir;	        
+        
+        // Compute normal based on object type
+        if (h.obj.type == TYPE_SPHERE) {
+            // For a unit sphere, the model-space normal is the normalised intersection point
+            vec4 model_normal = vec4(normalize(h.intersection.xyz), 0.0);
+            // Transform normal to world space
+            normal = normalize((h.obj.nv * model_normal).xyz);
+        } else { // TYPE_CUBE
+            vec4 model_normal = computeCubeNormal(h.intersection.xyz);
+            // Transform normal to world space
+            normal = normalize((h.obj.nv * model_normal).xyz);
+        }
+        
+        // We obtain the new direction by reflecting the ray w.r.t surface normal
+        rayDir = reflect(rayDir, normal);        
       
         // every bounce absorbs some light (more bounces = darker scene)
         //     - contains a hack for the checkerboard pattern of the floor
