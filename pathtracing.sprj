@@ -66,6 +66,11 @@
 						<value>true</value>
 					</row>
 				</variable>
+				<variable type="float" name="scattering_amplitude">
+					<row>
+						<value>0.100000001</value>
+					</row>
+				</variable>
 			</variables>
 			<macros />
 		</pass>
@@ -74,7 +79,6 @@
 	<cameras />
 	<settings>
 		<entry type="property" name="Simple" item="pipe" />
-		<entry type="file" name="Simple" shader="vs" />
 		<entry type="file" name="Simple" shader="ps" />
 		<entry type="pinned" name="averageCount" owner="Simple" />
 		<entry type="pinned" name="maxBounces" owner="Simple" />
@@ -84,10 +88,11 @@
 		<entry type="pinned" name="skyLightSwitch" owner="Simple" />
 		<entry type="pinned" name="colorByNormal" owner="Simple" />
 		<entry type="pinned" name="useGammaCorrection" owner="Simple" />
+		<entry type="pinned" name="scattering_amplitude" owner="Simple" />
 		<entry type="camera" fp="false">
-			<distance>46</distance>
+			<distance>33</distance>
 			<pitch>88</pitch>
-			<yaw>127</yaw>
+			<yaw>144</yaw>
 			<roll>360</roll>
 		</entry>
 		<entry type="clearcolor" r="0" g="0" b="0" a="0" />

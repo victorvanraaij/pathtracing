@@ -26,7 +26,9 @@ uniform vec4 vViewPosition;
 
  uniform bool colorByNormal;
  uniform bool useGammaCorrection;
-
+ 
+ // How much a certain roughness scatters light
+ uniform float scattering_amplitude;
 
 // some basic transformations
 mat4 Translate(in vec3 v) {       // TODO
@@ -62,6 +64,31 @@ mat4 Scale(in vec3 v) {          // TODO
 }
 
 /* TODO: add other transforms if needed */
+
+mat4 RotateX(in float theta) {    // TODO
+		// Standard homogeneous rotation matrix of positive theta degrees around the X-axis
+		float s = sin(theta);
+		float c = cos(theta);
+        return mat4(
+        vec4(1, 0, 0, 0),
+        vec4(0, c, -s, 0),
+        vec4(0, s, c, 0),
+        vec4(0, 0, 0, 1)
+        );
+}
+
+mat4 RotateZ(in float theta) {    // TODO
+		// Standard homogeneous rotation matrix of positive theta degrees around the Z-axis
+		float s = sin(theta);
+		float c = cos(theta);
+        return mat4(
+        vec4(c, -s, 0, 0),
+        vec4(s, c, 0, 0),
+        vec4(0, 0, 1, 0),
+        vec4(0, 0, 0, 1)
+        );
+}
+
 
 
 //--scene data---------------------------------------------------------------------
@@ -249,7 +276,6 @@ HitData AllObjectsRayTest(vec3 rayPos, vec3 rayDir)
         // Normalise Ray Dir
         mrd.xyz = normalize(mrd.xyz);
 
-
         // compute the ray parameters t0t1 for entry and exit in model space
         vec2 t0t1 = obj.type==TYPE_SPHERE
         		? rayUnitSphereIntersect(mr0.xyz,mrd.xyz)
@@ -315,7 +341,6 @@ vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex)
         //+0.0001 to prevent ray already hit @ start pos
         HitData h = AllObjectsRayTest(rayOrigin + rayDir * 0.0001, rayDir);
         
-        
        // rays end at light source
 	   if (h.obj.isLight) {	finalColor = h.obj.color * absorbMul;	break; }
                    
@@ -337,8 +362,19 @@ vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex)
             normal = normalize((h.obj.nv * model_normal).xyz);
         }
         
+        // Generates random angles between between positive and negative scattering_amplitude, scaled by the objects roughness,
+        // using the AAIndex as a seed
+        float random_angle_x = scattering_amplitude * h.obj.roughness * (rand01(AAIndex * 434.578) - 0.5);
+        float random_angle_y = scattering_amplitude * h.obj.roughness * (rand01(AAIndex * 734.978) - 0.5);
+        float random_angle_z = scattering_amplitude * h.obj.roughness * (rand01(AAIndex * 897.709) - 0.5);
+        
+        // Rotate the normal by the random angles. This makes physical sense, as we're
+        // directly simulating the non-uniformity of rough suface normals.
+        // For an object with zero roughness, the normal should stay the same
+        normal = mat3(RotateX(random_angle_x)) * mat3(RotateY(random_angle_y)) * mat3(RotateZ(random_angle_z)) * normal;
+        
         // We obtain the new direction by reflecting the ray w.r.t surface normal
-        rayDir = reflect(rayDir, normal);        
+        rayDir = reflect(rayDir, normal);
       
         // every bounce absorbs some light (more bounces = darker scene)
         //     - contains a hack for the checkerboard pattern of the floor
