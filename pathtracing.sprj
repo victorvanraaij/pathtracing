@@ -74,6 +74,7 @@
 	<cameras />
 	<settings>
 		<entry type="property" name="Simple" item="pipe" />
+		<entry type="file" name="Simple" shader="vs" />
 		<entry type="file" name="Simple" shader="ps" />
 		<entry type="pinned" name="averageCount" owner="Simple" />
 		<entry type="pinned" name="maxBounces" owner="Simple" />
@@ -84,9 +85,9 @@
 		<entry type="pinned" name="colorByNormal" owner="Simple" />
 		<entry type="pinned" name="useGammaCorrection" owner="Simple" />
 		<entry type="camera" fp="false">
-			<distance>42</distance>
-			<pitch>89</pitch>
-			<yaw>67</yaw>
+			<distance>41</distance>
+			<pitch>-71</pitch>
+			<yaw>192</yaw>
 			<roll>360</roll>
 		</entry>
 		<entry type="clearcolor" r="0" g="0" b="0" a="0" />

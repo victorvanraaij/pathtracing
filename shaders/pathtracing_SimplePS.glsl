@@ -102,9 +102,10 @@ Object makeObject(bool enabled, int type, vec3 center, vec3 size, vec3 color, fl
     obj.isTransparent = false;
     obj.isFloor = false;
     obj.isLight = false;
-    obj.m2w = mat4(1);  // TODO
-    obj.w2m = mat4(1);  // TODO
-    obj.nv  = mat4(1);  // TODO
+    obj.m2w = T * R * S;  // TODO
+    obj.w2m = inverse(T * R * S);  // TODO
+    // If TRS is orthonormal, taking the transpose and inverse is redundant
+    obj.nv  = transpose(inverse(T * R * S));  // TODO
     return obj;
 }
 
@@ -169,13 +170,9 @@ vec2 rayUnitSphereIntersect(vec3 r0, vec3 rd) { // TODO
 	float t_plus = -b + sqrt(b * b - c);
 	float t_min = -b - sqrt(b * b - c);
 	
-	// Ensure the return vector is in the right order
-	if (t_plus < t_min) {
-		return vec2(t_plus, t_min);
-	}
-	else {
-		return vec2(t_min, t_plus);
-	}
+	// Since the square root will always be positive (or zero), t_min is always
+	// either smaller or equal to t_plus
+	return vec2(t_min, t_plus);
 }
 
 /* returns signed distances (t0,t1) to the intersections of ray and cube, t0 <= t1; 
@@ -242,8 +239,8 @@ HitData AllObjectsRayTest(vec3 rayPos, vec3 rayDir)
     	if (!obj.enabled) continue;
         
          // TODO 1: transform the ray to model space
-	    vec4 mr0 = vec4(rayPos,1); 
-		vec4 mrd = vec4(rayDir,0);
+	    vec4 mr0 = obj.w2m * vec4(rayPos,1); 
+		vec4 mrd = obj.w2m * vec4(rayDir,0);
         
 
         // compute the ray parameters t0t1 for entry and exit in model space
@@ -252,14 +249,31 @@ HitData AllObjectsRayTest(vec3 rayPos, vec3 rayDir)
         		: rayUnitBoxIntersect(mr0.xyz,mrd.xyz); 
         
         // TODO 2: determine closest positive ray parameter for an intersection
-        float t = t0t1.x;
+        
+        // Default to no intersection
+        float t = -1;
+        // The intersection functions ensure t0t1.x < t0t1.y, so if t0t1.x > 0, it's the closest
+        // positive ray parameter
+        if (t0t1.x > 0) {
+			t = t0t1.x;
+        }
+        // t0t1.x is negative and t0t1.y positive, automatically making t0t1.y the closest
+        // positive ray parameter
+        else if (t0t1.y > 0) {
+			t = t0t1.y;
+        }
+        // At this point, both ray parameters must be negative, 
+        // and therefore no intersection takes place
         
         // TODO If new intersection is closer, update hit information
         if( t > 0.001 && t < hitData.closest)
         {
-            hitData.closest = 0;
+        	// The distance to the new closest intersection
+            hitData.closest = t;
+            // Update the object that is being hit the closest
 			hitData.obj = obj;
-		    hitData.intersection = mr0;
+			// The point in model space hit by the ray, using the vector equation of a line
+		    hitData.intersection = mr0 + mrd * t;
         }
     }    
     
