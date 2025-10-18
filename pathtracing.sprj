@@ -26,12 +26,12 @@
 				<variable type="int" name="frame" system="FrameIndex" />
 				<variable type="int" name="averageCount">
 					<row>
-						<value>25</value>
+						<value>50</value>
 					</row>
 				</variable>
 				<variable type="int" name="maxBounces">
 					<row>
-						<value>20</value>
+						<value>10</value>
 					</row>
 				</variable>
 				<variable type="bool" name="showSphere">
@@ -68,12 +68,12 @@
 				</variable>
 				<variable type="float" name="scattering_amplitude">
 					<row>
-						<value>0.200000003</value>
+						<value>6.46000004</value>
 					</row>
 				</variable>
 				<variable type="float" name="animationSpeed">
 					<row>
-						<value>1</value>
+						<value>0.100000001</value>
 					</row>
 				</variable>
 				<variable type="bool" name="showLocalLight">
@@ -83,16 +83,45 @@
 				</variable>
 				<variable type="float3" name="localLightColor">
 					<row>
-						<value>0.0474649891</value>
-						<value>0.768339753</value>
-						<value>0.759989798</value>
+						<value>0.999989986</value>
+						<value>1</value>
+						<value>0.999999881</value>
+					</row>
+				</variable>
+				<variable type="bool" name="spacial_jitter">
+					<row>
+						<value>true</value>
+					</row>
+				</variable>
+				<variable type="bool" name="showWalls">
+					<row>
+						<value>true</value>
+					</row>
+				</variable>
+				<variable type="float" name="wallRoughness">
+					<row>
+						<value>0.0299999993</value>
+					</row>
+				</variable>
+				<variable type="bool" name="showPillars">
+					<row>
+						<value>true</value>
+					</row>
+				</variable>
+				<variable type="bool" name="useEnvMap">
+					<row>
+						<value>true</value>
 					</row>
 				</variable>
 			</variables>
 			<macros />
 		</pass>
 	</pipeline>
-	<objects />
+	<objects>
+		<object type="texture" path="skymap.jpg" vflip="false" min_filter="Linear" mag_filter="Nearest" wrap_s="Repeat" wrap_t="Repeat">
+			<bind slot="0" name="Simple" />
+		</object>
+	</objects>
 	<cameras />
 	<settings>
 		<entry type="file" name="Simple" shader="vs" />
@@ -109,10 +138,15 @@
 		<entry type="pinned" name="animationSpeed" owner="Simple" />
 		<entry type="pinned" name="showLocalLight" owner="Simple" />
 		<entry type="pinned" name="localLightColor" owner="Simple" />
+		<entry type="pinned" name="spacial_jitter" owner="Simple" />
+		<entry type="pinned" name="showWalls" owner="Simple" />
+		<entry type="pinned" name="wallRoughness" owner="Simple" />
+		<entry type="pinned" name="showPillars" owner="Simple" />
+		<entry type="pinned" name="useEnvMap" owner="Simple" />
 		<entry type="camera" fp="false">
-			<distance>34</distance>
-			<pitch>88</pitch>
-			<yaw>333</yaw>
+			<distance>43</distance>
+			<pitch>81</pitch>
+			<yaw>261</yaw>
 			<roll>360</roll>
 		</entry>
 		<entry type="clearcolor" r="0" g="0" b="0" a="0" />
