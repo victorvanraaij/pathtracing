@@ -26,12 +26,12 @@
 				<variable type="int" name="frame" system="FrameIndex" />
 				<variable type="int" name="averageCount">
 					<row>
-						<value>50</value>
+						<value>70</value>
 					</row>
 				</variable>
 				<variable type="int" name="maxBounces">
 					<row>
-						<value>10</value>
+						<value>50</value>
 					</row>
 				</variable>
 				<variable type="bool" name="showSphere">
@@ -68,7 +68,7 @@
 				</variable>
 				<variable type="float" name="scattering_amplitude">
 					<row>
-						<value>6.46000004</value>
+						<value>3.20000005</value>
 					</row>
 				</variable>
 				<variable type="float" name="animationSpeed">
@@ -100,7 +100,7 @@
 				</variable>
 				<variable type="float" name="wallRoughness">
 					<row>
-						<value>0.0299999993</value>
+						<value>0.180000007</value>
 					</row>
 				</variable>
 				<variable type="bool" name="showPillars">
@@ -144,7 +144,7 @@
 		<entry type="pinned" name="showPillars" owner="Simple" />
 		<entry type="pinned" name="useEnvMap" owner="Simple" />
 		<entry type="camera" fp="false">
-			<distance>43</distance>
+			<distance>50</distance>
 			<pitch>81</pitch>
 			<yaw>261</yaw>
 			<roll>360</roll>

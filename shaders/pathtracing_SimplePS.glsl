@@ -471,17 +471,13 @@ vec3 cosineSampleHemisphere(in float r1, in float r2, in vec3 U, in vec3 V, in v
 }
 
 //---------------------------------------------------------------------
-vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex)
+vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex, float spatial_hash)
 {
     //init
     vec3 finalColor = vec3(0.0);
     vec3 absorbMul = vec3(1.0);
     vec3 rayOrigin = cameraPos;
     vec3 rayDir = cameraRayDir;
-    
-    // Use the initial ray direction, which is unique per-pixel
-    // dotting with prime numbers is a simple, effective hash
-    float ray_hash = dot(cameraRayDir, vec3(12.9898, 78.233, 151.719));
 
         
     //recursion not available in GLSL; replace by looping 
@@ -520,15 +516,19 @@ vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex)
             normal = normalize((h.obj.nv * model_normal).xyz);
         }
         
-        // Generates random angles between between positive and negative scattering_amplitude, scaled by the objects roughness,
-        // using the AAIndex as a seed
-        // using index and unique ray_hash to seed randomness
-        float seed_x = float(i) * 123.456 + AAIndex * 434.578 + ray_hash;
-        float seed_y = float(i) * 789.123 + AAIndex * 734.978 + ray_hash;
-        float seed_z = float(i) * 456.789 + AAIndex * 897.709 + ray_hash;
+		// Seeds for random numbers
+        // We need unique seeds based on pixel (ray_hash), sample (AAIndex), and bounce (i) to avoid correlation patterns
+        // We use different magic numbers for each seed to ensure they are different
+
+        float seed_bounce_type = float(i) * 1.234 + AAIndex * 434.578 + spatial_hash;
+        float seed_r1 = float(i) * 5.678 + AAIndex * 312.123 + spatial_hash;
+        float seed_r2 = float(i) * 8.901 + AAIndex * 983.123 + spatial_hash;
+        float seed_x = float(i) * 2.345 + AAIndex * 897.709 + spatial_hash;
+        float seed_y = float(i) * 3.456 + AAIndex * 734.978 + spatial_hash;
+        float seed_z = float(i) * 4.567 + AAIndex * 123.456 + spatial_hash;
                
         // Here we will decide whether to do a specular or diffuse bounce
-        float bounce_type_rand = rand01(seed_x);
+        float bounce_type_rand = rand01(seed_bounce_type);
         
         if (bounce_type_rand < h.obj.roughness)  // Diffuse bounce
         {
@@ -537,8 +537,8 @@ vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex)
             createOrthoNormalBasis(normal, U, V);
             
             // Get two new random numbers for our hemisphere direction
-            float r1 = rand01(seed_y);
-            float r2 = rand01(seed_z);
+            float r1 = rand01(seed_r1);
+            float r2 = rand01(seed_r2);
             
             // The new ray direction is a random cosine-weighted vector
             rayDir = cosineSampleHemisphere(r1, r2, U, V, normal);
@@ -573,7 +573,7 @@ vec3 calculateFinalColor(vec3 cameraPos, vec3 cameraRayDir, float AAIndex)
     		// Set a minimum survival chance to avoid 0/0
     		float survival_prob = max(0.1, p); 
 
-    		float seed_rr = float(i) * 123.456 + AAIndex * 789.123 + ray_hash;
+    		float seed_rr = float(i) * 123.456 + AAIndex * 789.123 + spatial_hash;
     		if (rand01(seed_rr) > survival_prob) {
        			break; // Terminate this path
     		}
@@ -608,14 +608,16 @@ vec4 computeColor( vec2 fragCoord )
     //camera-to-fragment ray direction
     vec3 rayDir = normalize(3*cameraDir + vec3(uv, 0));
     
-    float ray_hash = dot(rayDir, vec3(12.9898, 78.233, 151.719));
+    // Trying to reduce correlation with random numbers
+    float seed = dot(texCoord, vec2(12.9898, 78.233));
+    float spatial_hash = rand01(seed);
 
     vec3 finalColor = vec3(0);
     for(int i = 1; i <= averageCount; i++)
     {
 		if(spacial_jitter) {
-			float seed1 = float(i) * 123.456 + texCoord.x * 434.578 + ray_hash;
-        	float seed2 = float(i) * 789.123 + texCoord.y * 734.978 + ray_hash;
+			float seed1 = float(i) * 123.456 + spatial_hash;
+        	float seed2 = float(i) * 789.123 + spatial_hash;
         
         	// Random offset from -0.5 to +0.5 pixels
         	float offsetX = (rand01(seed1) - 0.5) / vResolution.x;
@@ -631,7 +633,7 @@ vec4 computeColor( vec2 fragCoord )
 		}
     
     
-        finalColor += calculateFinalColor(cameraPos, rayDir, float(i));
+        finalColor += calculateFinalColor(cameraPos, rayDir, float(i), spatial_hash);
     }
     finalColor = finalColor/float(averageCount);//brute force AA & denoise
     
